@@ -1,17 +1,25 @@
 import numpy as np
+import networkx as nx
+import matplotlib.pyplot as plt
 import random
 
 class Graph:
     """ Implementation  for undirected and unweighted graphs
     """
     
-    def __init__(self, path):
+    def __init__(self, path = '', adjency_matrix = []):
         """ Initiating constructor
 
         Args:
             path (string): path to .txt file with adjency matrix 
+            adjency_matrix (list[list[int]]): adjency matrix
         """
-        self.adjency_matrix = self.load_adjency_matrix(path) 
+        if len(adjency_matrix) > 0:
+            self.adjency_matrix = adjency_matrix
+        elif len(path) > 0:
+            self.adjency_matrix = self.load_adjency_matrix(path) 
+        else:
+            self.adjency_matrix = []
     
     def load_adjency_matrix(self, path):
         """ Load adjency matrix from the .txt file
@@ -32,7 +40,7 @@ class Graph:
             adjency_matrix.append([])
             for j in range(len(temp[i])):
                 adjency_matrix[i].append(temp[i][j])
-        return adjency_matrix
+        return np.array(adjency_matrix)
     
     def generate_random_graph(self, number_of_vertices, density):
         """ Generate a graph with a given  number of vertices and density
@@ -143,4 +151,34 @@ class Graph:
             if (i in V) and (self.adjency_matrix[vertex][i] > 0):
                 return(True)
         return(False)
+
+    def largest_first(self):
+        """ Largest First algorithm for graph coloring 
+        """
+        V = self.sort_vertices_descending_by_degrees()
+        graph_colored = []
+        S = []
+        while sum(V) > -1 * len(V):
+            for i in range(len(V)):
+                if (not self.is_neighbor(V[i], S)) and (V[i] >= 0):
+                    S.append(V[i])
+                    V[i] = -1
+            graph_colored.append(S)
+            S = []
+        return(graph_colored)
+                    
+    def draw_graph(self):
+        """ Draw colored graph using Largest First or modified DSatur algorithm
+        """
+        rand_colors = []
+        colouring_of_the_graph = self.largest_first() #TODO Dodac drugi algorytm do wyboru
+        for _ in range(len(colouring_of_the_graph)):
+            rand_colors.append("#"+''.join([random.choice('ABCDEF0123456789') for _ in range(6)]))
+        G = nx.from_numpy_matrix(self.adjency_matrix)
+        graph_colors = [0 for _ in range(len(self.adjency_matrix))]
+        for i in range(len(colouring_of_the_graph)):
+            for j in colouring_of_the_graph[i]:
+                graph_colors[j] = rand_colors[i]
+        nx.draw(G, node_color = graph_colors)
+        plt.show()
 
