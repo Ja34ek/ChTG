@@ -42,6 +42,17 @@ class Graph:
                 adjency_matrix[i].append(temp[i][j])
         return np.array(adjency_matrix)
     
+    def save_adjency_matrix(self, name):
+        """ Save adjency matrix to .txt file
+
+        Args:
+            name (string): name of the new .txt file
+        """
+        file = open(name, 'a')
+        for row in self.adjency_matrix:
+            file.write(" ".join(map(str, row)) + "\n")
+        file.close
+            
     def generate_random_graph(self, number_of_vertices, density):
         """ Generate a graph with a given  number of vertices and density
 
@@ -179,6 +190,9 @@ class Graph:
         for i in range(len(colouring_of_the_graph)):
             for j in colouring_of_the_graph[i]:
                 graph_colors[j] = rand_colors[i]
-        nx.draw(G, node_color = graph_colors)
+        plt.figure()
+        ax = plt.gca()
+        ax.set_title('Number of used colors: ' + str(len(colouring_of_the_graph)))
+        nx.draw(G, node_color = graph_colors, ax=ax)
         plt.show()
 
