@@ -34,12 +34,15 @@ class Graph:
         adjency_matrix = []
         with open(path) as file:
             lines = file.readlines()
+            
         for line in lines:
             temp.append(list(map(int, line.split(' '))))
+            
         for i in range(len(temp)):
             adjency_matrix.append([])
             for j in range(len(temp[i])):
                 adjency_matrix[i].append(temp[i][j])
+                
         return np.array(adjency_matrix)
     
     def save_adjency_matrix(self, name):
@@ -51,6 +54,7 @@ class Graph:
         file = open(name, 'a')
         for row in self.adjency_matrix:
             file.write(" ".join(map(str, row)) + "\n")
+
         file.close
             
     def generate_random_graph(self, number_of_vertices, density):
@@ -71,6 +75,7 @@ class Graph:
         adjency_matrix = np.eye(number_of_vertices, dtype=int)
         temp_adjency_matrix = adjency_matrix.flatten()
         number_of_edges = int(density * number_of_vertices * (number_of_vertices - 1) / 2)
+        
         for i in range(number_of_edges):
             j = random.randint(0, number_of_vertices * (number_of_vertices - 1) - 2*i - 1)
             temp = list(np.where(temp_adjency_matrix == 0)[0])
@@ -78,6 +83,7 @@ class Graph:
             row_no = int(temp[j]/number_of_vertices)
             temp_adjency_matrix[row_no * number_of_vertices + col_no] = 1
             temp_adjency_matrix[col_no * number_of_vertices + row_no] = 1
+            
         adjency_matrix = temp_adjency_matrix.reshape(number_of_vertices, number_of_vertices) - np.eye(number_of_vertices)
         return adjency_matrix
 
@@ -143,8 +149,10 @@ class Graph:
                     temp_list.append(j)
                 else:
                     temp_list.append(j) 
+                    
             if not vartex_inserted:
-                temp_list.append(i)        
+                temp_list.append(i)      
+                  
             sorted_vertices = temp_list
         return (sorted_vertices)
     
@@ -174,22 +182,36 @@ class Graph:
                 if (not self.is_neighbor(V[i], S)) and (V[i] >= 0):
                     S.append(V[i])
                     V[i] = -1
+                    
             graph_colored.append(S)
             S = []
         return(graph_colored)
                     
-    def draw_graph(self):
+    def d_satur(self, k):
+        # TODO
+        return([[vertex] for vertex in range(len(self.adjency_matrix))])
+        
+    def draw_graph(self, use_largest_first = False, use_d_satur = False, k = 0):
         """ Draw colored graph using Largest First or modified DSatur algorithm
         """
+        if (use_largest_first and use_d_satur) or (not use_largest_first and not use_d_satur):
+            raise Exception('You have to choose only one algorithm.') 
+        
         rand_colors = []
-        colouring_of_the_graph = self.largest_first() #TODO Dodac drugi algorytm do wyboru
+        if use_largest_first:
+            colouring_of_the_graph = self.largest_first()
+        else:
+            colouring_of_the_graph = self.d_satur(k)     
+                  
         for _ in range(len(colouring_of_the_graph)):
             rand_colors.append("#"+''.join([random.choice('ABCDEF0123456789') for _ in range(6)]))
+            
         G = nx.from_numpy_matrix(self.adjency_matrix)
         graph_colors = [0 for _ in range(len(self.adjency_matrix))]
         for i in range(len(colouring_of_the_graph)):
             for j in colouring_of_the_graph[i]:
                 graph_colors[j] = rand_colors[i]
+                
         plt.figure()
         ax = plt.gca()
         ax.set_title('Number of used colors: ' + str(len(colouring_of_the_graph)))
