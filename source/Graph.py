@@ -7,31 +7,31 @@ class Graph:
     """ Implementation  for undirected and unweighted graphs
     """
     
-    def __init__(self, path = '', adjency_matrix = []):
+    def __init__(self, path = '', adjacency_matrix = []):
         """ Initiating constructor
 
         Args:
-            path (string): path to .txt file with adjency matrix 
-            adjency_matrix (list[list[int]]): adjency matrix
+            path (string): path to .txt file with adjacency matrix 
+            adjacency_matrix (list[list[int]]): adjacency matrix
         """
-        if len(adjency_matrix) > 0:
-            self.adjency_matrix = adjency_matrix
+        if len(adjacency_matrix) > 0:
+            self.adjacency_matrix = adjacency_matrix
         elif len(path) > 0:
-            self.adjency_matrix = self.load_adjency_matrix(path) 
+            self.adjacency_matrix = self.load_adjacency_matrix(path) 
         else:
-            self.adjency_matrix = []
+            self.adjacency_matrix = []
     
-    def load_adjency_matrix(self, path):
-        """ Load adjency matrix from the .txt file
+    def load_adjacency_matrix(self, path):
+        """ Load adjacency matrix from the .txt file
 
         Args:
-            path (string): path to .txt file with adjency matrix 
+            path (string): path to .txt file with adjacency matrix 
 
         Returns:
-            list[list[int]]: adjency matrix
+            list[list[int]]: adjacency matrix
         """
         temp = []
-        adjency_matrix = []
+        adjacency_matrix = []
         with open(path) as file:
             lines = file.readlines()
             
@@ -39,20 +39,20 @@ class Graph:
             temp.append(list(map(int, line.split(' '))))
             
         for i in range(len(temp)):
-            adjency_matrix.append([])
+            adjacency_matrix.append([])
             for j in range(len(temp[i])):
-                adjency_matrix[i].append(temp[i][j])
+                adjacency_matrix[i].append(temp[i][j])
                 
-        return np.array(adjency_matrix)
+        return(np.array(adjacency_matrix))
     
-    def save_adjency_matrix(self, name):
-        """ Save adjency matrix to .txt file
+    def save_adjacency_matrix(self, name):
+        """ Save adjacency matrix to .txt file
 
         Args:
             name (string): name of the new .txt file
         """
         file = open(name, 'a')
-        for row in self.adjency_matrix:
+        for row in self.adjacency_matrix:
             file.write(" ".join(map(str, row)) + "\n")
 
         file.close
@@ -68,24 +68,24 @@ class Graph:
             Exception: If density is not between 0 and 1
 
         Returns:
-            list[list[int]]: adjency matrix
+            list[list[int]]: adjacency matrix
         """
-        if (density > 1) or (density < 0):
+        if not 0 <= density <= 1:
             raise Exception('Density must be between 0 and 1.') 
-        adjency_matrix = np.eye(number_of_vertices, dtype=int)
-        temp_adjency_matrix = adjency_matrix.flatten()
+        adjacency_matrix = np.eye(number_of_vertices, dtype=int)
+        temp_adjacency_matrix = adjacency_matrix.flatten()
         number_of_edges = int(density * number_of_vertices * (number_of_vertices - 1) / 2)
         
         for i in range(number_of_edges):
             j = random.randint(0, number_of_vertices * (number_of_vertices - 1) - 2*i - 1)
-            temp = list(np.where(temp_adjency_matrix == 0)[0])
+            temp = list(np.where(temp_adjacency_matrix == 0)[0])
             col_no = temp[j] % number_of_vertices
             row_no = int(temp[j]/number_of_vertices)
-            temp_adjency_matrix[row_no * number_of_vertices + col_no] = 1
-            temp_adjency_matrix[col_no * number_of_vertices + row_no] = 1
+            temp_adjacency_matrix[row_no * number_of_vertices + col_no] = 1
+            temp_adjacency_matrix[col_no * number_of_vertices + row_no] = 1
             
-        adjency_matrix = temp_adjency_matrix.reshape(number_of_vertices, number_of_vertices) - np.eye(number_of_vertices)
-        return adjency_matrix
+        adjacency_matrix = temp_adjacency_matrix.reshape(number_of_vertices, number_of_vertices) - np.eye(number_of_vertices)
+        return adjacency_matrix
 
     def vertex_degree(self, vertex):
         """ Get degree of the vertex
@@ -96,11 +96,7 @@ class Graph:
         Returns:
             int: degree
         """
-        degree = 0
-        for i in range(len(self.adjency_matrix[vertex])):
-            if self.adjency_matrix[vertex][i] == 1:
-                degree += 1
-        return degree
+        return(sum(self.adjacency_matrix[vertex]))
     
     def graph_degree(self):
         """ Get degree of the graph
@@ -109,14 +105,9 @@ class Graph:
             maximum (int): vertex of the graph
             vertex (int): vertex with maximum degree
         """
-        maximum = 0
-        vertex = 0
-        for i in range(len(self.adjency_matrix)):
-            temp = self.vertex_degree(i) 
-            if temp > maximum:
-                maximum = temp
-                vertex = i
-        return(maximum, vertex) 
+        degree = np.sum(self.adjacency_matrix, axis=0)
+        vertex = np.argmax(degree)
+        return(degree[vertex], vertex)
     
     def delete_edges_connected_to_vertex(self, vertex):
         """ Delete all vertices connected to given vertex
@@ -125,11 +116,11 @@ class Graph:
             vertex (int): vertex
             
         Returns:
-            list[list[int]]: adjency matrix where given vertex has zero degree
+            list[list[int]]: adjacency matrix where given vertex has zero degree
         """
-        for i in range(len(self.adjency_matrix)):
-            self.adjency_matrix[vertex][i] = 0
-            self.adjency_matrix[i][vertex] = 0
+        for i in range(len(self.adjacency_matrix)):
+            self.adjacency_matrix[vertex][i] = 0
+            self.adjacency_matrix[i][vertex] = 0
     
     def sort_vertices_descending_by_degrees(self):
         """ Sort the vertices in descending order by their degrees
@@ -138,7 +129,7 @@ class Graph:
             list[int]: sorted vertices
         """
         sorted_vertices = [0]
-        for i in range(1, len(self.adjency_matrix)):
+        for i in range(1, len(self.adjacency_matrix)):
             degree = self.vertex_degree(i)
             temp_list = []
             vartex_inserted = False
@@ -154,7 +145,7 @@ class Graph:
                 temp_list.append(i)      
                   
             sorted_vertices = temp_list
-        return (sorted_vertices)
+        return(sorted_vertices)
     
     def is_neighbor(self, vertex, V):
         """ Check whether a vertex is adjacent to any of the vertices in the set V.
@@ -166,8 +157,8 @@ class Graph:
         Returns:
             bool: True if given vertex is neighbor to a vertex from set V, False otherwise
         """
-        for i in range(len(self.adjency_matrix[vertex])):
-            if (i in V) and (self.adjency_matrix[vertex][i] > 0):
+        for i in range(len(self.adjacency_matrix[vertex])):
+            if (i in V) and (self.adjacency_matrix[vertex][i] > 0):
                 return(True)
         return(False)
 
@@ -189,32 +180,60 @@ class Graph:
                     
     def d_satur(self, k):
         # TODO
-        return([[vertex] for vertex in range(len(self.adjency_matrix))])
-        
-    def draw_graph(self, use_largest_first = False, use_d_satur = False, k = 0):
-        """ Draw colored graph using Largest First or modified DSatur algorithm
-        """
-        if (use_largest_first and use_d_satur) or (not use_largest_first and not use_d_satur):
-            raise Exception('You have to choose only one algorithm.') 
-        
+        return([[vertex] for vertex in range(len(self.adjacency_matrix))])
+    
+    def create_node_colors(self,colouring_of_the_graph):
         rand_colors = []
-        if use_largest_first:
-            colouring_of_the_graph = self.largest_first()
-        else:
-            colouring_of_the_graph = self.d_satur(k)     
-                  
         for _ in range(len(colouring_of_the_graph)):
             rand_colors.append("#"+''.join([random.choice('ABCDEF0123456789') for _ in range(6)]))
-            
-        G = nx.from_numpy_matrix(self.adjency_matrix)
-        graph_colors = [0 for _ in range(len(self.adjency_matrix))]
+        
+        graph = nx.from_numpy_matrix(self.adjacency_matrix)
+        graph_colors = [0 for _ in range(len(self.adjacency_matrix))]
         for i in range(len(colouring_of_the_graph)):
             for j in colouring_of_the_graph[i]:
                 graph_colors[j] = rand_colors[i]
                 
-        plt.figure()
-        ax = plt.gca()
-        ax.set_title('Number of used colors: ' + str(len(colouring_of_the_graph)))
-        nx.draw(G, node_color = graph_colors, ax=ax)
-        plt.show()
+        return(graph, graph_colors)
+        
+    def draw_graph(self, use_largest_first = False, use_d_satur = False, k = 0):
+        """ Draw colored graph using Largest First or modified DSatur algorithm
+        """
+        if (not use_largest_first and not use_d_satur):
+            raise Exception('You have to choose at least one algorithm.') 
+        
+        graph_colors_lf = None
+        graph_colors_ds = None
+        graph_lf = None
+        graph_ds = None
+        colouring_of_the_graph_lf = []
+        colouring_of_the_graph_ds = []
+        if use_largest_first:
+            colouring_of_the_graph_lf = self.largest_first()
+            graph_lf, graph_colors_lf = self.create_node_colors(colouring_of_the_graph_lf)
+            
+        if use_d_satur:
+            colouring_of_the_graph_ds = self.d_satur(k)
+            graph_ds, graph_colors_ds = self.create_node_colors(colouring_of_the_graph_ds)
+
+        if use_largest_first and use_d_satur:
+            _, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4))
+            ax1.set_title('Number of used colors in LargestFirst: ' + str(len(colouring_of_the_graph_lf)))
+            nx.draw(graph_lf, node_color=graph_colors_lf, ax=ax1)
+            ax2.set_title('Number of used colors in DSatur: ' + str(len(colouring_of_the_graph_ds)))
+            nx.draw(graph_ds, node_color=graph_colors_ds, ax=ax2)
+            plt.show()
+            
+        elif use_largest_first:
+            plt.figure()
+            ax = plt.gca()
+            ax.set_title('Number of used colors: ' + str(len(colouring_of_the_graph_lf)))
+            nx.draw(graph_lf, node_color = graph_colors_lf, ax=ax)
+            plt.show()
+            
+        else: 
+            plt.figure()
+            ax = plt.gca()
+            ax.set_title('Number of used colors: ' + str(len(colouring_of_the_graph_ds)))
+            nx.draw(graph_ds, node_color = graph_colors_ds, ax=ax)
+            plt.show()
 
