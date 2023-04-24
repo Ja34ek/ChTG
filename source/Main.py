@@ -1,6 +1,5 @@
 import tkinter as tk
 from Graph import Graph
-from PIL import ImageTk, Image
 
 class GraphApp:
     def __init__(self, master):
@@ -15,7 +14,7 @@ class GraphApp:
 2) Pokoloruj graf zmodyfikowanym algorytmem DSatur \n\
 3) Porównaj oba algorytmy"
         
-        self.menu_label = tk.Label(master, text=self.main_options, width=1500, height=125, fg="white", font=("Arial", 16), image=button_image, compound="center", justify="left")
+        self.menu_label = tk.Label(master, text=self.main_options, width=1500, height=125, fg="black", font=("Arial", 16), compound="center", justify="left")
         self.menu_label.pack()
 
         self.menu_choice = tk.Entry(master, width=34)
@@ -27,11 +26,11 @@ class GraphApp:
         self.submit_button = tk.Button(master, text="Zatwierdź", command=self.select_menu_option, width=12, height=3, font=("Arial", 13), bg='#5cac2d')
         self.submit_button.place(relx=0.36, rely=0.32)
 
-        self.run_again_button = tk.Button(master, text="Wróc", command=self.select_run_option, width=12, height=3, font=("Arial", 13), bg='#6370b6')
+        self.run_again_button = tk.Button(master, text="Wróc", command=self.select_run_option, width=12, height=3, font=("Arial", 13), bg='#ff1133')
         self.run_again_button.place(relx=0.55, rely=0.32)
         
-        button_quit = tk.Button(root, text="ZAKOŃCZ", command=self.quit_program, width=10, height=2, font=("Arial", 12), bg='#ff1133')
-        button_quit.pack(side=tk.BOTTOM, anchor=tk.SE)
+        button_quit = tk.Button(master, text="ZAKOŃCZ", command=self.quit_program, width=10, height=2, font=("Arial", 12), bg='#ff1133')
+        button_quit.place(relx=0.9, rely=0.9)
 
     def select_menu_option(self):
         choice = self.menu_choice.get()
@@ -114,11 +113,6 @@ class GraphApp:
         root.quit()
 
 root = tk.Tk()
-image = Image.open("images/background.jpg")
-photo = ImageTk.PhotoImage(image)
-button_image = tk.PhotoImage(file="images/button.png")    
-background_label = tk.Label(root, image=photo)
-background_label.place(x=0, y=0, relwidth=1, relheight=1)
 root.attributes('-fullscreen', True)
 graph_app = GraphApp(root)
 root.mainloop()
