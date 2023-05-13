@@ -14,7 +14,7 @@ class Graph:
             path (string): path to .txt file with adjacency matrix 
             adjacency_matrix (list[list[int]]): adjacency matrix
         """
-        if len(adjacency_matrix) > 0:
+        if len(adjacency_matrix) > 0 and self.is_adjacency_matrix_symmetric(adjacency_matrix):
             self.adjacency_matrix = adjacency_matrix
         elif len(path) > 0:
             self.adjacency_matrix = self.load_adjacency_matrix(path) 
@@ -55,8 +55,20 @@ class Graph:
         for row in self.adjacency_matrix:
             file.write(" ".join(map(str, row)) + "\n")
 
-        file.close
-            
+        file.close()
+        
+    def is_adjacency_matrix_symmetric(self, adjacency_matrix):
+        """ Check whether a given adjacency matrix is symmetric or not
+
+        Args:
+            adjacency_matrix (list[list[int]]): adjacency matrix
+
+        Returns:
+            bool: True if given adjacency_matrix is symmetric, False otherwise
+        """
+        transposition = np.transpose(adjacency_matrix)   
+        return np.array_equal(adjacency_matrix, transposition)
+    
     def generate_random_graph(self, number_of_vertices, density):
         """ Generate a graph with a given  number of vertices and density
 
@@ -132,16 +144,16 @@ class Graph:
         for i in range(1, len(self.adjacency_matrix)):
             degree = self.vertex_degree(i)
             temp_list = []
-            vartex_inserted = False
+            vertex_inserted = False
             for j in sorted_vertices:
-                if degree >= self.vertex_degree(j) and not vartex_inserted:
+                if degree >= self.vertex_degree(j) and not vertex_inserted:
                     temp_list.append(i)
-                    vartex_inserted = True
+                    vertex_inserted = True
                     temp_list.append(j)
                 else:
                     temp_list.append(j) 
                     
-            if not vartex_inserted:
+            if not vertex_inserted:
                 temp_list.append(i)      
                   
             sorted_vertices = temp_list
@@ -165,6 +177,9 @@ class Graph:
     def largest_first(self):
         """ Largest First algorithm for graph coloring 
         """
+        if self.adjacency_matrix == []:
+            raise Exception('There is no adjacency matrix.') 
+            
         V = self.sort_vertices_descending_by_degrees()
         graph_colored = []
         S = []
