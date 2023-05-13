@@ -1,4 +1,5 @@
 import tkinter as tk
+import numpy as np
 from Graph import Graph
 
 class GraphApp:
@@ -80,8 +81,12 @@ class GraphApp:
             self.draw_graph(G, use_largest_first=use_largest_first, use_d_satur=use_d_satur, k=k)
 
     def load_graph_from_adjacency_matrix(self, use_largest_first = False, use_d_satur = False, k = 0):
-        G = Graph()
-        # TODO
+        adjacency_matrix = eval(self.menu_choice.get())
+        G = Graph(adjacency_matrix = np.array(adjacency_matrix))
+        if use_d_satur:
+            self.select_k_constant(G, use_largest_first=use_largest_first, use_d_satur=use_d_satur)
+        else:
+            self.draw_graph(G, use_largest_first=use_largest_first, use_d_satur=use_d_satur, k=k)
 
     def generate_random_graph_with_density(self, use_largest_first = False, use_d_satur = False, k = 0):
         number_of_vertices = int(self.menu_choice.get())
