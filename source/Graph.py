@@ -269,36 +269,16 @@ class Graph:
                 maks = min(colours_max)
                 color_not_selected = True
                 while color_not_selected:
-                    if maks > 0:
-                        index = [i for i, element in enumerate(colouring_of_the_graph) if element == maks]
-                        if len(index) == 0:
-                            colouring_of_the_graph[choice] = maks
+                    for color in range(1, (k-1)*(n-1) + 2):
+                        color_correct = True
+                        for limit in range(len(colours_max)):
+                            if (color > colours_max[limit] and color < colours_min[limit]):
+                                color_correct = False
+                                break
+                        if color_correct:
                             color_not_selected = False
-                        else:
-                            exist = 0
-                            for v in index:
-                                if self.distance_between_vertex(choice,v) == 1:
-                                    maks = maks - 1
-                                    exist = 1
-                                    break
-                            if not exist:
-                                colouring_of_the_graph[choice] = maks
-                                color_not_selected = False
-                    else:
-                        index = [i for i, element in enumerate(colouring_of_the_graph) if element == mini]
-                        if len(index) == 0:
-                            colouring_of_the_graph[choice] = mini
-                            color_not_selected = False
-                        else:
-                            exist = 0
-                            for v in index:
-                                if self.distance_between_vertex(choice, v) == 1:
-                                    mini = mini + 1
-                                    exist = 1
-                                    break
-                            if not exist:
-                                colouring_of_the_graph[choice] = mini
-                                color_not_selected = False
+                            colouring_of_the_graph[choice] = color
+                            break
         vertex = []
         for colors in set(colouring_of_the_graph):
             vertex.append([i for i, elem in enumerate(colouring_of_the_graph) if elem == colors])
