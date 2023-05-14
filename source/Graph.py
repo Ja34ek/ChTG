@@ -193,9 +193,116 @@ class Graph:
             S = []
         return(graph_colored)
                     
+    def distance_between_vertex(self, first_vertex, second_vertex):
+        n = len(self.adjacency_matrix)
+        visited = [False] * n
+        distance = [float('inf')] * n
+
+        distance[first_vertex] = 0
+
+        while True:
+            min_distance = float('inf')
+            current_vertex = None
+
+            # Wybierz wierzchołek o najmniejszej odległości spośród nieodwiedzonych
+            for v in range(n):
+                if not visited[v] and distance[v] < min_distance:
+                    min_distance = distance[v]
+                    current_vertex = v
+
+            if current_vertex is None:
+                # Wierzchołek końcowy jest nieosiągalny
+                return float('inf')
+
+            if current_vertex == second_vertex:
+                # Osiągnięto wierzchołek końcowy
+                return distance[current_vertex]
+
+            visited[current_vertex] = True
+
+            # Zaktualizuj odległości do sąsiadów
+            for v in range(n):
+                if self.adjacency_matrix[current_vertex][v] == 1:
+                    new_distance = distance[current_vertex] + 1
+                    if new_distance < distance[v]:
+                        distance[v] = new_distance
+
+    def vertices_with_max_saturation(self, colouring_of_the_graph):
+        n = len(colouring_of_the_graph)
+        temp_list = []
+        for v in range(n):
+            v_set = {0}
+            for u in range(n):
+                if self.adjacency_matrix[v][u] == 1 and colouring_of_the_graph[u] != 0:
+                    v_set.add(colouring_of_the_graph[u])
+            v_set.remove(0)
+            temp_list.append(len(v_set))
+        list_coloured_vertex = [i for i, element in enumerate(colouring_of_the_graph) if element > 0]
+        for i in sorted(set(temp_list), reverse=True):
+            vertex = [j for j, element in enumerate(temp_list) if element == i]
+            if len(list(set(vertex) - set(list_coloured_vertex))) > 0:
+                return list(set(vertex) - set(list_coloured_vertex))
+
+
+
     def d_satur(self, k):
-        # TODO
-        return([[vertex] for vertex in range(len(self.adjacency_matrix))])
+        n = len(self.adjacency_matrix)
+        colouring_of_the_graph = [0]*n
+        for _ in range(n):
+            V = self.vertices_with_max_saturation(colouring_of_the_graph)
+            choice = V[0]
+            if len(V) > 1:
+                for v in V:
+                    if self.vertex_degree(v) > self.vertex_degree(choice):
+                        choice = v
+
+            if colouring_of_the_graph == [0]*n:
+                colouring_of_the_graph[choice] = 1
+            else:
+                colours_min = []
+                colours_max = []
+                for v in range(n):
+                    if colouring_of_the_graph[v] != 0:
+                        colours_max.append(self.distance_between_vertex(choice, v) - k + colouring_of_the_graph[v])
+                        colours_min.append(k - self.distance_between_vertex(choice, v) + colouring_of_the_graph[v])
+                mini = max(colours_min)
+                maks = min(colours_max)
+                color_not_selected = True
+                while color_not_selected:
+                    if maks > 0:
+                        index = [i for i, element in enumerate(colouring_of_the_graph) if element == maks]
+                        if len(index) == 0:
+                            colouring_of_the_graph[choice] = maks
+                            color_not_selected = False
+                        else:
+                            exist = 0
+                            for v in index:
+                                if self.distance_between_vertex(choice,v) == 1:
+                                    maks = maks - 1
+                                    exist = 1
+                                    break
+                            if not exist:
+                                colouring_of_the_graph[choice] = maks
+                                color_not_selected = False
+                    else:
+                        index = [i for i, element in enumerate(colouring_of_the_graph) if element == mini]
+                        if len(index) == 0:
+                            colouring_of_the_graph[choice] = mini
+                            color_not_selected = False
+                        else:
+                            exist = 0
+                            for v in index:
+                                if self.distance_between_vertex(choice, v) == 1:
+                                    mini = mini + 1
+                                    exist = 1
+                                    break
+                            if not exist:
+                                colouring_of_the_graph[choice] = mini
+                                color_not_selected = False
+        vertex = []
+        for colors in set(colouring_of_the_graph):
+            vertex.append([i for i, elem in enumerate(colouring_of_the_graph) if elem == colors])
+        return vertex
     
     def create_node_colors(self,colouring_of_the_graph):
         rand_colors = []
