@@ -246,6 +246,7 @@ class Graph:
 
 
     def d_satur(self, k):
+        k = max(k, 2)
         n = len(self.adjacency_matrix)
         colouring_of_the_graph = [0]*n
         for _ in range(n):
